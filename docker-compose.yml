@@ -1,25 +1,19 @@
-version: "3.8"
+version: '3.8'
 
 services:
   freecad:
     build: .
-    container_name: freecad-3d
-    restart: unless-stopped
+    image: freecad-custom:latest
+    container_name: freecad
     ports:
-      - "${WEBUI_PORT:-9876}:9876"
-      - "${RPC_PORT:-9875}:9875"
-      - "${NOVNC_PORT:-6080}:6080"
+      - "6080:6080"    # noVNC web interface
+      - "9876:9876"    # WebUI (VNC + Chat)
+      - "9877:9877"    # AI Bridge
+    env_file:
+      - .env
     environment:
-      - POLZA_API_KEY=${POLZA_API_KEY}
-      - POLZA_MODEL=${POLZA_MODEL:-xiaomi/mimo-v2.5}
-    volumes:
-      - freecad-data:/workspace
-    shm_size: "2gb"
-    healthcheck:
-      test: ["CMD", "bash", "-c", "netstat -tlnp | grep -q 9876"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-volumes:
-  freecad-data:
+      - CORS_ORIGIN=*
+      - ENABLE_SCREENSHOT=1
+      - ENABLE_LOG_FEEDBACK=1
+      - MAX_RETRIES=2
+    restart: unless-stopped
